@@ -1,0 +1,18 @@
+experiment: quant_dynamic
+seed: 42
+device: cpu
+data:
+  name: cifar10
+  root: data
+  batch_size: 256
+  num_workers: 2
+  download: false
+  skip_integrity_check: true
+model:
+  name: resnet18
+  num_classes: 10
+  pretrained: false
+baseline_checkpoint: checkpoints/baseline_resnet18_best.pt
+paths:
+  checkpoint_dir: checkpoints
+  results_dir: results/raw

@@ -1,0 +1,56 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class$
+*.egg-info/
+*.eggs/
+build/
+dist/
+*.whl
+*.so
+.venv/
+venv/
+env/
+.env
+.env.*
+.python-version
+pip-log.txt
+pip-delete-this-directory.txt
+python3.*
+
+# Logs
+*.log
+run_all.log
+
+# Tooling
+.ruff_cache/
+.pytest_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.tox/
+.cache/
+
+# Data and weights (runtime)
+data/
+checkpoints/
+*.pt
+*.pth
+*.onnx
+
+# Experiment raw dumps; keep summary + figures
+results/raw/
+!results/.gitkeep
+!results/summary.csv
+!results/figures/
+!results/figures/**
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
