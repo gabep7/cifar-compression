@@ -113,6 +113,6 @@ PyTorch eager unstructured sparsity does not yield automatic wall-clock speedups
 - Distillation gain is modest (0.52 points); a stronger student or different hyperparameters might widen the gap.
 - Next steps: structured channel pruning, QAT, export + ORT benchmarks, stronger students, multi-seed error bars.
 
-## 8. CV bullet
+## 8. Summary
 
-Trained a CIFAR-10 ResNet-18 baseline (93.11% accuracy) and compared global magnitude pruning at 50/80/90% sparsity (92.59-93.08%), response-based knowledge distillation into MobileNetV3-Small vs scratch control (76.52% vs 76.00%), and dynamic qint8 quantization (93.09%) on accuracy, parameter sparsity, model size, and inference latency; ran all experiments on a Kaggle Tesla T4 GPU and documented tradeoffs including the negative result that dynamic Linear-only quantization does not benefit conv-heavy architectures.
+I trained a CIFAR-10 ResNet-18 baseline at 93.11% accuracy, then pruned it at 50/80/90% sparsity (92.59-93.08% after fine-tuning), distilled it into a MobileNetV3-Small student (76.52% vs 76.00% from scratch), and quantized the Linear layers to qint8 (93.09%). I measured accuracy, parameter sparsity, model size, and inference latency for each. The most interesting result: dynamic Linear-only quantization does not help conv-heavy models like ResNet, which is a useful thing to know before reaching for it in production.

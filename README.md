@@ -1,8 +1,8 @@
-# CIFAR-10 model efficiency experiments
+# CIFAR-10 compression experiments
 
-Research-first portfolio project comparing **pruning**, **dynamic quantization**, and **knowledge distillation** on CIFAR-10. Measures accuracy, sparsity, disk size, and latency so tradeoffs are explicit.
+I trained a ResNet-18 on CIFAR-10 and compared three ways to make it smaller or faster: magnitude pruning, knowledge distillation into MobileNetV3-Small, and dynamic quantization. The goal was to see what actually moves the needle on accuracy, parameter count, model size, and inference latency.
 
-Primary writeup: [`report.md`](report.md).
+The full writeup with results and discussion is in [`report.md`](report.md).
 
 ## Setup
 
@@ -11,27 +11,27 @@ cd ~/Projects/Personal/cvproj
 uv sync
 ```
 
-Requires Python 3.11+. Uses `torch` / `torchvision`. CUDA or MPS is used automatically when available; smoke runs work on CPU.
+Requires Python 3.11+. Uses `torch` and `torchvision`. CUDA or MPS is used automatically when available. I ran the full experiments on a Kaggle Tesla T4.
 
-## Reproduce full experiments
+## Reproduce
 
 ```bash
-# 1) Baseline teacher (ResNet-18, ~50 epochs)
+# 1) Baseline (ResNet-18, 50 epochs)
 uv run python scripts/train_baseline.py --config configs/baseline.yaml
 
-# 2) Global magnitude prune + fine-tune
+# 2) Prune + fine-tune at 50%, 80%, 90%
 uv run python scripts/run_prune.py --config configs/prune_50.yaml
 uv run python scripts/run_prune.py --config configs/prune_80.yaml
 uv run python scripts/run_prune.py --config configs/prune_90.yaml
 
-# 3) Student: KD vs from-scratch control
+# 3) Distillation + scratch control
 uv run python scripts/run_distill.py --config configs/distill_mobilenet.yaml --mode distill
 uv run python scripts/run_distill.py --config configs/distill_mobilenet.yaml --mode scratch
 
-# 4) Dynamic quant (CPU)
+# 4) Dynamic quantization (CPU only)
 uv run python scripts/run_quantize.py --config configs/quant_dynamic.yaml
 
-# 5) Unified table + plots
+# 5) Benchmark everything into one table + plots
 uv run python scripts/run_benchmark.py --checkpoints \
   baseline=checkpoints/baseline_resnet18_best.pt \
   prune50=checkpoints/prune_50_best.pt \
@@ -43,56 +43,36 @@ uv run python scripts/run_benchmark.py --checkpoints \
 uv run python scripts/plot_results.py
 ```
 
-Outputs:
+Or just run `make all`.
 
-- `results/summary.csv`
-- `results/figures/acc_vs_size.png`
-- `results/figures/acc_vs_latency.png`
-- `results/figures/sparsity_vs_acc.png`
-- raw JSON under `results/raw/`
+## Results
 
-## Smoke path (wiring only, 1 epoch)
-
-```bash
-uv sync
-uv run python scripts/train_baseline.py --config configs/smoke.yaml
-uv run python scripts/run_prune.py --config configs/smoke_prune.yaml
-uv run python scripts/run_distill.py --config configs/smoke_distill.yaml --mode distill
-uv run python scripts/run_distill.py --config configs/smoke_distill.yaml --mode scratch
-uv run python scripts/run_quantize.py --config configs/quant_dynamic.yaml
-uv run python scripts/run_benchmark.py --config configs/smoke.yaml --checkpoints \
-  baseline=checkpoints/baseline_resnet18_best.pt \
-  prune50=checkpoints/prune_50_best.pt \
-  student_distill=checkpoints/student_distill_best.pt \
-  student_scratch=checkpoints/student_scratch_best.pt \
-  quant_dynamic=checkpoints/baseline_resnet18_best.pt
-uv run python scripts/plot_results.py
-```
+| name | method | accuracy | sparsity | size_mb | latency_ms_p50 |
+| --- | --- | --- | --- | --- | --- |
+| baseline | ResNet-18 | 93.11% | 0% | 42.70 | 2.49 |
+| prune50 | prune | 93.08% | 50% | 42.70 | 2.51 |
+| prune80 | prune | 92.91% | 80% | 42.70 | 2.51 |
+| prune90 | prune | 92.59% | 90% | 42.70 | 2.53 |
+| student_distill | KD | 76.52% | 0% | 5.96 | 4.87 |
+| student_scratch | scratch | 76.00% | 0% | 5.96 | 4.88 |
+| quant_dynamic | qint8 | 93.09% | 0% | 42.69 | 17.88 (CPU) |
 
 ## Layout
 
 ```
-configs/          experiment YAML
+configs/          experiment YAML files
 src/efflab/       shared library
-scripts/          train / prune / distill / quant / benchmark / plot
+scripts/          train, prune, distill, quant, benchmark, plot
 results/          summary.csv, figures/, raw/
-checkpoints/      gitignored weights
-report.md         research writeup
+report.md         full writeup with discussion
 ```
 
-## Hardware note
+## Hardware
 
-Fill after your runs: OS, CPU/GPU, torch version, device used for training vs quant (quant is CPU-only).
-
-Example template:
-
-```
-Hardware: <machine>
-Train device: <cuda|mps|cpu>
-Quant device: cpu
-torch: <version>
-```
+- Training: Kaggle Tesla T4 (16GB)
+- Quantization eval: CPU (forced, dynamic quant requires it)
+- torch 2.10.0+cu128, Python 3.12
 
 ## License
 
-Personal portfolio project. Use and adapt as you like for applications and learning.
+MIT. Use and adapt freely.
