@@ -26,11 +26,11 @@ We apply dynamic quantization (`qint8`) to `nn.Linear` modules only and evaluate
 
 Student: MobileNetV3-Small with a 10-way classifier head. Loss:
 
-\[
-\mathcal{L} = \alpha\,\mathrm{CE}(z_s, y) + (1-\alpha)\,T^{2}\,\mathrm{KL}\big(\log\mathrm{softmax}(z_s/T),\,\mathrm{softmax}(z_t/T)\big)
-\]
+$$
+\mathcal{L} = \alpha\,\mathrm{CE}(z_s, y) + (1-\alpha)\,T^{2}\,\mathrm{KL}\!\big(\log\mathrm{softmax}(z_s/T)\,\|\,\mathrm{softmax}(z_t/T)\big)
+$$
 
-Defaults: \(T=4\), \(\alpha=0.3\), 50 epochs, lr 0.05, milestones 30/40. Teacher is frozen in eval mode. We also train a **scratch control** (same student architecture and schedule, no teacher) to isolate the distillation signal.
+Defaults: $T=4$, $\alpha=0.3$, 50 epochs, lr 0.05, milestones 30/40. Teacher is frozen in eval mode. We also train a **scratch control** (same student architecture and schedule, no teacher) to isolate the distillation signal.
 
 ## 4. Experimental setup
 
