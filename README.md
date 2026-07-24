@@ -7,7 +7,7 @@ The full writeup with results and discussion is in [`report.md`](report.md).
 ## Setup
 
 ```bash
-cd ~/Projects/Personal/cvproj
+cd ~/Projects/Personal/cvproj/cifar-compression
 uv sync
 ```
 
